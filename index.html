@@ -71,6 +71,7 @@
     font-size: 15px; outline: none;
   }
   .search-wrap input::placeholder { color: rgba(255,255,255,.5); }
+  #q-musica:empty::before { content: attr(data-placeholder); color: rgba(255,255,255,.5); pointer-events: none; }
 
   /* ── SONG LIST ── */
   .song-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 0; }
@@ -238,12 +239,11 @@
   <div class="topbar">
     <div style="font-size:22px">🎵</div>
     <h1>Repertório <span id="count-badge"></span></h1>
-    <button class="tb-btn" onclick="openGistConfig()" title="Configurar sync">⚙️</button>
     <button class="tb-btn" onclick="syncGist()" title="Sincronizar">🔄</button>
     <button class="tb-btn" onclick="showAdd(null)" title="Nova música">➕</button>
   </div>
   <div class="search-wrap">
-    <input type="text" id="q-musica" name="q_musica_rep" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="🔍  Buscar música ou artista..." oninput="renderList()" />
+    <div id="q-musica" contenteditable="true" role="searchbox" aria-label="Buscar música ou artista" spellcheck="false" oninput="renderList()" style="width:100%;padding:9px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:15px;outline:none;min-height:38px;line-height:1.4;" data-placeholder="🔍  Buscar música ou artista..."></div>
   </div>
   <div class="song-list" id="song-list"></div>
   <div class="gist-bar">
@@ -454,7 +454,7 @@ function showList() {
 }
 
 function renderList() {
-  const q = (document.getElementById('q-musica').value || '').toLowerCase();
+  const q = (document.getElementById('q-musica').innerText || '').toLowerCase().trim();
   const filtered = songs
     .filter(s => s.name.toLowerCase().includes(q) || (s.artist||'').toLowerCase().includes(q))
     .sort((a, b) => a.name.localeCompare(b.name, 'pt', { sensitivity: 'base' }));
@@ -815,6 +815,11 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
+// Impede Enter (nova linha) no campo de busca contenteditable
+document.getElementById('q-musica').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); }
+});
+
 // Swipe left to go back from play screen
 let touchStartX = 0;
 document.getElementById('screen-play').addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
@@ -825,7 +830,7 @@ document.getElementById('screen-play').addEventListener('touchend', e => {
 
 // ── INIT ──
 // Limpa campo de busca (Chrome preenche automaticamente mesmo com autocomplete=off)
-document.getElementById('q-musica').value = '';
+document.getElementById('q-musica').innerHTML = '';
 // Grava credenciais padrão no localStorage se ainda não configuradas
 if (!localStorage.getItem(LS_TOKEN))   localStorage.setItem(LS_TOKEN, DEFAULT_TOKEN);
 if (!localStorage.getItem(LS_GIST_ID)) localStorage.setItem(LS_GIST_ID, DEFAULT_GIST_ID);
