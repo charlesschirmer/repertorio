@@ -142,6 +142,8 @@
     padding: 20px 18px 240px;
     font-size: 17px; line-height: 2;
     font-family: var(--mono);
+    white-space: pre-wrap;
+    word-break: break-word;
   }
   .cl { color: #7EC8E3; font-weight: 700; }
   .ll { color: rgba(255,255,255,.9); }
@@ -574,15 +576,31 @@ function playSong(id) {
   showScreen('screen-play');
 }
 
-const CHORD_RE = /^(\s*)([A-G][#b]?(m|maj|min|dim|aug|sus|add|2|4|5|6|7|9|11|13|M)?[0-9]?(\/?[A-G][#b]?)?(\s+[A-G][#b]?(m|maj|min|dim|aug|sus|add|2|4|5|6|7|9|11|13|M)?[0-9]?(\/?[A-G][#b]?)?)*)\s*$/;
+// Detecta se uma linha é de cifras:
+// - contém apenas tokens de acorde (A-G com modificadores) separados por espaços
+// - pode ter espaços antes (para alinhamento)
+// - não contém palavras comuns de letra
+function isChordLine(line) {
+  const t = line.trim();
+  if (!t) return false;
+  // Linha de tablatura/comentário entre parênteses
+  if (/^\(.*\)$/.test(t)) return false;
+  // Divide por espaços e verifica se TODOS os tokens são acordes válidos
+  const tokens = t.split(/\s+/).filter(Boolean);
+  if (!tokens.length) return false;
+  const chordToken = /^[A-G][#b]?(m|maj|min|dim|aug|sus|add|°|ø)?[0-9]?(\/?[A-G][#b]?)?(\.)?$/;
+  return tokens.every(tok => chordToken.test(tok));
+}
+
 const BRACKET_RE = /^\s*\(.*\)\s*$/;
 
 function renderLyrics(txt) {
   const lines = txt.split('\n');
   const html = lines.map(line => {
+    if (!line.trim()) return '<div class="ll">&nbsp;</div>';
     if (BRACKET_RE.test(line)) return `<div class="bl">${esc(line)}</div>`;
-    if (CHORD_RE.test(line.trim()) && line.trim().length > 0) return `<div class="cl">${esc(line)}</div>`;
-    return `<div class="ll">${esc(line) || '&nbsp;'}</div>`;
+    if (isChordLine(line))     return `<div class="cl">${esc(line)}</div>`;
+    return `<div class="ll">${esc(line)}</div>`;
   }).join('');
   const inner = document.getElementById('lyrics-inner');
   inner.innerHTML = html;
