@@ -453,10 +453,9 @@ function showList() {
 
 function renderList() {
   const q = (document.getElementById('search-input').value || '').toLowerCase();
-  const filtered = songs.filter(s =>
-    s.name.toLowerCase().includes(q) ||
-    (s.artist||'').toLowerCase().includes(q)
-  );
+  const filtered = songs
+    .filter(s => s.name.toLowerCase().includes(q) || (s.artist||'').toLowerCase().includes(q))
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt', { sensitivity: 'base' }));
   const el = document.getElementById('song-list');
   document.getElementById('count-badge').textContent = songs.length ? `(${songs.length})` : '';
 
