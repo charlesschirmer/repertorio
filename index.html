@@ -243,7 +243,7 @@
     <button class="tb-btn" onclick="showAdd(null)" title="Nova música">➕</button>
   </div>
   <div class="search-wrap">
-    <input type="text" id="search-input" name="rep_busca" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="🔍  Buscar música ou artista..." oninput="renderList()" />
+    <input type="text" id="q-musica" name="q_musica_rep" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="🔍  Buscar música ou artista..." oninput="renderList()" />
   </div>
   <div class="song-list" id="song-list"></div>
   <div class="gist-bar">
@@ -454,7 +454,7 @@ function showList() {
 }
 
 function renderList() {
-  const q = (document.getElementById('search-input').value || '').toLowerCase();
+  const q = (document.getElementById('q-musica').value || '').toLowerCase();
   const filtered = songs
     .filter(s => s.name.toLowerCase().includes(q) || (s.artist||'').toLowerCase().includes(q))
     .sort((a, b) => a.name.localeCompare(b.name, 'pt', { sensitivity: 'base' }));
@@ -824,6 +824,8 @@ document.getElementById('screen-play').addEventListener('touchend', e => {
 }, { passive: true });
 
 // ── INIT ──
+// Limpa campo de busca (Chrome preenche automaticamente mesmo com autocomplete=off)
+document.getElementById('q-musica').value = '';
 // Grava credenciais padrão no localStorage se ainda não configuradas
 if (!localStorage.getItem(LS_TOKEN))   localStorage.setItem(LS_TOKEN, DEFAULT_TOKEN);
 if (!localStorage.getItem(LS_GIST_ID)) localStorage.setItem(LS_GIST_ID, DEFAULT_GIST_ID);
