@@ -73,6 +73,94 @@
   .search-wrap input::placeholder { color: rgba(255,255,255,.5); }
   #q-musica:empty::before { content: attr(data-placeholder); color: rgba(255,255,255,.5); pointer-events: none; }
 
+  /* ── TABS ── */
+  .tabs-wrap { display: flex; background: var(--top2); flex-shrink: 0; }
+  .tab-btn {
+    flex: 1; background: none; border: none; color: rgba(255,255,255,.55);
+    padding: 11px 0; font-size: 14px; font-weight: 600; cursor: pointer;
+    border-bottom: 3px solid transparent;
+  }
+  .tab-btn.active { color: #fff; border-bottom-color: var(--accent); }
+
+  /* ── PLAYLIST CARDS ── */
+  .pl-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px;
+    border-bottom: .5px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  .pl-item:active { background: var(--border); }
+  .pl-thumb {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: linear-gradient(135deg, #003D6B, #00253f);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: 19px; flex-shrink: 0;
+  }
+  .pl-info { flex: 1; min-width: 0; }
+  .pl-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pl-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .pl-actions { display: flex; gap: 6px; }
+
+  .pl-sub-row {
+    padding: 10px 14px 4px; font-size: 13px; color: var(--text2); font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  /* ── SONG PICKER (checklist com reorder) ── */
+  .pick-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    border-bottom: .5px solid var(--border);
+  }
+  .pick-check {
+    width: 24px; height: 24px; border-radius: 7px;
+    border: 2px solid var(--text2); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px; color: transparent;
+  }
+  .pick-check.checked { background: var(--top); border-color: var(--top); color: #fff; }
+  .pick-info { flex: 1; min-width: 0; cursor: pointer; }
+  .pick-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pick-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .pick-order {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--top); color: #fff; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .pick-reorder { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+  .pr-btn {
+    background: var(--border); border: none; border-radius: 5px;
+    width: 26px; height: 20px; font-size: 11px; cursor: pointer; color: var(--text);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pr-btn:active { opacity: .6; }
+  .pr-btn:disabled { opacity: .25; pointer-events: none; }
+
+  /* ── RUN LIST (execução do repertório) ── */
+  .run-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 14px;
+    border-bottom: .5px solid var(--border);
+    cursor: pointer; user-select: none;
+  }
+  .run-item:active { background: var(--border); }
+  .run-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--top); color: #fff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .run-title { font-size: 15px; font-weight: 600; }
+  .run-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+  .play-nav-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .nav-btn {
+    flex: 1; background: rgba(255,255,255,.1); border: none; border-radius: 9px;
+    color: #fff; padding: 9px 0; font-size: 13px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .nav-btn:disabled { opacity: .3; pointer-events: none; }
+  .nav-btn:active { opacity: .6; }
+
   /* ── SONG LIST ── */
   .song-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 0; }
   .song-item {
@@ -240,12 +328,17 @@
     <div style="font-size:22px">🎵</div>
     <h1>Repertório <span id="count-badge"></span></h1>
     <button class="tb-btn" onclick="syncGist()" title="Sincronizar">🔄</button>
-    <button class="tb-btn" onclick="showAdd(null)" title="Nova música">➕</button>
+    <button class="tb-btn" id="add-main-btn" onclick="showAdd(null)" title="Nova música">➕</button>
   </div>
-  <div class="search-wrap">
+  <div class="tabs-wrap">
+    <button class="tab-btn active" id="tab-musicas" onclick="switchTab('musicas')">🎵 Músicas</button>
+    <button class="tab-btn" id="tab-repertorios" onclick="switchTab('repertorios')">📋 Repertórios</button>
+  </div>
+  <div class="search-wrap" id="search-wrap-musicas">
     <div id="q-musica" contenteditable="true" role="searchbox" aria-label="Buscar música ou artista" spellcheck="false" oninput="renderList()" style="width:100%;padding:9px 14px;border-radius:10px;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:15px;outline:none;min-height:38px;line-height:1.4;" data-placeholder="🔍  Buscar música ou artista..."></div>
   </div>
   <div class="song-list" id="song-list"></div>
+  <div class="song-list" id="playlist-list" style="display:none"></div>
   <div class="gist-bar">
     <div class="gist-status" id="gist-status">Nenhum Gist configurado</div>
     <button class="gist-btn outline" onclick="exportJSON()" title="Exportar JSON">⬇️ Exportar</button>
@@ -254,10 +347,39 @@
   </div>
 </div>
 
+<!-- ══════════════ TELA EDITAR REPERTÓRIO ══════════════ -->
+<div id="screen-playlist-edit" class="screen">
+  <div class="topbar">
+    <button class="tb-btn" onclick="cancelPlaylistEdit()">✕</button>
+    <h2 id="pl-edit-title">Novo repertório</h2>
+    <button class="tb-save" onclick="savePlaylist()">Salvar</button>
+  </div>
+  <div class="add-body" style="padding-bottom:6px">
+    <div class="fg">
+      <label>Nome do repertório *</label>
+      <input type="text" id="pl-name" placeholder="Ex: Repertório 19/6 — Igreja" autocomplete="off" />
+    </div>
+  </div>
+  <div class="pl-sub-row">
+    <span id="pl-sel-count">0 músicas selecionadas</span>
+  </div>
+  <div class="song-list" id="pl-song-picker"></div>
+</div>
+
+<!-- ══════════════ TELA EXECUTAR REPERTÓRIO ══════════════ -->
+<div id="screen-playlist-run" class="screen">
+  <div class="topbar">
+    <button class="tb-btn" onclick="showScreen('screen-list'); switchTab('repertorios')">◀</button>
+    <h2 id="pl-run-title">—</h2>
+    <button class="tb-btn" onclick="showAdd(null)" title="Nova música">➕</button>
+  </div>
+  <div class="song-list" id="pl-run-list"></div>
+</div>
+
 <!-- ══════════════ TELA PLAY ══════════════ -->
 <div id="screen-play" class="screen">
   <div class="play-top">
-    <button class="pb" onclick="showList()">◀</button>
+    <button class="pb" onclick="backFromPlay()">◀</button>
     <h2 id="play-title">—</h2>
     <button class="pb" onclick="resetScroll()" title="Reiniciar">↩</button>
     <button class="pb" id="edit-btn" onclick="editCurrent()" title="Editar">✏️</button>
@@ -266,6 +388,10 @@
     <div class="lyrics-inner" id="lyrics-inner"></div>
   </div>
   <div class="play-bar">
+    <div class="play-nav-row" id="play-nav-row" style="display:none">
+      <button class="nav-btn" id="nav-prev" onclick="navPlaylist(-1)">⬅ Anterior</button>
+      <button class="nav-btn" id="nav-next" onclick="navPlaylist(1)">Próxima ➡</button>
+    </div>
     <div class="speed-row">
       <label>⏩ VELOCIDADE</label>
       <input type="range" id="speed-sl" min="1" max="20" step="1" value="4" oninput="updateSpeed(this.value)">
@@ -344,6 +470,7 @@
 //  DADOS
 // ══════════════════════════════════════════
 const LS_SONGS   = 'rep_songs_v2';
+const LS_PLAYLISTS = 'rep_playlists_v1';
 const LS_TOKEN   = 'rep_gist_token';
 const LS_GIST_ID = 'rep_gist_id';
 
@@ -428,9 +555,16 @@ Ou me faça um homem de rocha`
 ];
 
 let songs = [];
+let playlists = [];
 let editingId = null;
 let currentSongId = null;
 let deleteTargetId = null;
+let deleteTargetType = 'song'; // 'song' | 'playlist'
+let editingPlaylistId = null;
+let plPickerSelection = []; // array de song ids na ordem escolhida
+let activeTab = 'musicas'; // 'musicas' | 'repertorios'
+let currentPlaylistId = null; // playlist ativa ao tocar uma música (para navegação)
+let currentPlaylistIdx = -1;  // índice da música atual dentro da playlist ativa
 
 // ── LOAD / SAVE ──
 function loadSongs() {
@@ -442,15 +576,37 @@ function loadSongs() {
 function saveSongs() {
   localStorage.setItem(LS_SONGS, JSON.stringify(songs));
 }
+function loadPlaylists() {
+  try {
+    const raw = localStorage.getItem(LS_PLAYLISTS);
+    playlists = raw ? JSON.parse(raw) : [];
+  } catch(e) { playlists = []; }
+}
+function savePlaylists() {
+  localStorage.setItem(LS_PLAYLISTS, JSON.stringify(playlists));
+}
 function uid() { return 'song_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
+function plUid() { return 'pl_' + Date.now() + '_' + Math.random().toString(36).slice(2,6); }
 
 // ══════════════════════════════════════════
-//  TELA LISTA
+//  TELA LISTA / ABAS
 // ══════════════════════════════════════════
 function showList() {
   stopScroll();
   showScreen('screen-list');
-  renderList();
+  if (activeTab === 'musicas') renderList(); else renderPlaylists();
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tab-musicas').classList.toggle('active', tab === 'musicas');
+  document.getElementById('tab-repertorios').classList.toggle('active', tab === 'repertorios');
+  document.getElementById('search-wrap-musicas').style.display = tab === 'musicas' ? '' : 'none';
+  document.getElementById('song-list').style.display = tab === 'musicas' ? '' : 'none';
+  document.getElementById('playlist-list').style.display = tab === 'repertorios' ? '' : 'none';
+  document.getElementById('add-main-btn').title = tab === 'musicas' ? 'Nova música' : 'Novo repertório';
+  document.getElementById('add-main-btn').setAttribute('onclick', tab === 'musicas' ? 'showAdd(null)' : 'showPlaylistEdit(null)');
+  if (tab === 'musicas') renderList(); else renderPlaylists();
 }
 
 function renderList() {
@@ -459,7 +615,9 @@ function renderList() {
     .filter(s => s.name.toLowerCase().includes(q) || (s.artist||'').toLowerCase().includes(q))
     .sort((a, b) => a.name.localeCompare(b.name, 'pt', { sensitivity: 'base' }));
   const el = document.getElementById('song-list');
-  document.getElementById('count-badge').textContent = songs.length ? `(${songs.length})` : '';
+  document.getElementById('count-badge').textContent = activeTab === 'musicas'
+    ? (songs.length ? `(${songs.length})` : '')
+    : (playlists.length ? `(${playlists.length})` : '');
 
   if (!filtered.length) {
     el.innerHTML = `<div class="empty">
@@ -478,10 +636,199 @@ function renderList() {
       </div>
       <div class="song-actions">
         <button class="sa-btn" onclick="showAdd('${s.id}')" title="Editar">✏️</button>
-        <button class="sa-btn" onclick="askDelete('${s.id}')" title="Excluir">🗑</button>
+        <button class="sa-btn" onclick="askDelete('${s.id}', 'song')" title="Excluir">🗑</button>
       </div>
     </div>
   `).join('');
+}
+
+// ══════════════════════════════════════════
+//  REPERTÓRIOS — LISTA
+// ══════════════════════════════════════════
+function renderPlaylists() {
+  const el = document.getElementById('playlist-list');
+  document.getElementById('count-badge').textContent = playlists.length ? `(${playlists.length})` : '';
+
+  if (!playlists.length) {
+    el.innerHTML = `<div class="empty">
+      <div class="ico">📋</div>
+      <p>Nenhum repertório ainda.<br>Toque ➕ para criar um.</p>
+    </div>`;
+    return;
+  }
+
+  const sorted = [...playlists].sort((a,b) => (b.updated_at||0) - (a.updated_at||0));
+
+  el.innerHTML = sorted.map(p => `
+    <div class="pl-item">
+      <div class="pl-thumb">📋</div>
+      <div class="pl-info" onclick="runPlaylist('${p.id}')">
+        <div class="pl-name">${esc(p.name)}</div>
+        <div class="pl-sub">${p.songIds.length} música${p.songIds.length === 1 ? '' : 's'}</div>
+      </div>
+      <div class="pl-actions">
+        <button class="sa-btn" onclick="showPlaylistEdit('${p.id}')" title="Editar">✏️</button>
+        <button class="sa-btn" onclick="askDelete('${p.id}', 'playlist')" title="Excluir">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+//  REPERTÓRIOS — CRIAR / EDITAR
+// ══════════════════════════════════════════
+function showPlaylistEdit(id) {
+  editingPlaylistId = id || null;
+  const pl = id ? playlists.find(p => p.id === id) : null;
+  document.getElementById('pl-edit-title').textContent = pl ? 'Editar repertório' : 'Novo repertório';
+  document.getElementById('pl-name').value = pl ? pl.name : '';
+  plPickerSelection = pl ? [...pl.songIds] : [];
+  renderPlaylistPicker();
+  showScreen('screen-playlist-edit');
+  setTimeout(() => document.getElementById('pl-name').focus(), 100);
+}
+
+function cancelPlaylistEdit() {
+  showList();
+}
+
+function renderPlaylistPicker() {
+  const el = document.getElementById('pl-song-picker');
+  document.getElementById('pl-sel-count').textContent =
+    `${plPickerSelection.length} música${plPickerSelection.length === 1 ? '' : 's'} selecionada${plPickerSelection.length === 1 ? '' : 's'}`;
+
+  // Ordena: selecionadas primeiro (na ordem escolhida), depois as demais em ordem alfabética
+  const selectedSongs = plPickerSelection
+    .map(id => songs.find(s => s.id === id))
+    .filter(Boolean);
+  const unselectedSongs = songs
+    .filter(s => !plPickerSelection.includes(s.id))
+    .sort((a,b) => a.name.localeCompare(b.name, 'pt', { sensitivity: 'base' }));
+
+  if (!songs.length) {
+    el.innerHTML = `<div class="empty"><div class="ico">🎵</div><p>Cadastre músicas primeiro.</p></div>`;
+    return;
+  }
+
+  let html = '';
+  selectedSongs.forEach((s, idx) => {
+    html += `
+      <div class="pick-item">
+        <div class="pick-order">${idx + 1}</div>
+        <div class="pick-info" onclick="togglePickSong('${s.id}')">
+          <div class="pick-title">${esc(s.name)}</div>
+          ${s.artist ? `<div class="pick-sub">${esc(s.artist)}</div>` : ''}
+        </div>
+        <div class="pick-reorder">
+          <button class="pr-btn" onclick="movePickSong('${s.id}', -1)" ${idx === 0 ? 'disabled' : ''} title="Subir">▲</button>
+          <button class="pr-btn" onclick="movePickSong('${s.id}', 1)" ${idx === selectedSongs.length - 1 ? 'disabled' : ''} title="Descer">▼</button>
+        </div>
+        <div class="pick-check checked" onclick="togglePickSong('${s.id}')">✓</div>
+      </div>`;
+  });
+  unselectedSongs.forEach(s => {
+    html += `
+      <div class="pick-item">
+        <div class="pick-info" onclick="togglePickSong('${s.id}')" style="margin-left:38px">
+          <div class="pick-title">${esc(s.name)}</div>
+          ${s.artist ? `<div class="pick-sub">${esc(s.artist)}</div>` : ''}
+        </div>
+        <div class="pick-check" onclick="togglePickSong('${s.id}')"></div>
+      </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function togglePickSong(id) {
+  const idx = plPickerSelection.indexOf(id);
+  if (idx >= 0) plPickerSelection.splice(idx, 1);
+  else plPickerSelection.push(id);
+  renderPlaylistPicker();
+}
+
+function movePickSong(id, dir) {
+  const idx = plPickerSelection.indexOf(id);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= plPickerSelection.length) return;
+  [plPickerSelection[idx], plPickerSelection[newIdx]] = [plPickerSelection[newIdx], plPickerSelection[idx]];
+  renderPlaylistPicker();
+}
+
+function savePlaylist() {
+  const name = document.getElementById('pl-name').value.trim();
+  if (!name) { toast('Informe o nome do repertório'); document.getElementById('pl-name').focus(); return; }
+  if (!plPickerSelection.length) { toast('Selecione ao menos uma música'); return; }
+
+  if (editingPlaylistId) {
+    const idx = playlists.findIndex(p => p.id === editingPlaylistId);
+    if (idx >= 0) playlists[idx] = { ...playlists[idx], name, songIds: [...plPickerSelection], updated_at: Date.now() };
+    toast('Repertório atualizado ✓');
+  } else {
+    playlists.push({ id: plUid(), name, songIds: [...plPickerSelection], updated_at: Date.now() });
+    toast('Repertório criado ✓');
+  }
+  savePlaylists();
+  switchTab('repertorios');
+}
+
+// ══════════════════════════════════════════
+//  REPERTÓRIOS — EXECUTAR
+// ══════════════════════════════════════════
+function runPlaylist(id) {
+  const pl = playlists.find(p => p.id === id);
+  if (!pl) return;
+  currentPlaylistId = id;
+  document.getElementById('pl-run-title').textContent = pl.name;
+  renderRunList(pl);
+  showScreen('screen-playlist-run');
+}
+
+function renderRunList(pl) {
+  const el = document.getElementById('pl-run-list');
+  const list = pl.songIds.map(id => songs.find(s => s.id === id)).filter(Boolean);
+
+  if (!list.length) {
+    el.innerHTML = `<div class="empty"><div class="ico">📋</div><p>Este repertório não tem músicas.</p></div>`;
+    return;
+  }
+
+  el.innerHTML = list.map((s, idx) => `
+    <div class="run-item" onclick="playFromPlaylist('${pl.id}', ${idx})">
+      <div class="run-num">${idx + 1}</div>
+      <div class="song-info">
+        <div class="run-title">${esc(s.name)}</div>
+        ${s.artist ? `<div class="run-sub">${esc(s.artist)}</div>` : ''}
+      </div>
+      <div class="song-arrow" style="color:var(--text2)">▶</div>
+    </div>
+  `).join('');
+}
+
+function playFromPlaylist(plId, idx) {
+  const pl = playlists.find(p => p.id === plId);
+  if (!pl) return;
+  currentPlaylistId = plId;
+  currentPlaylistIdx = idx;
+  const songId = pl.songIds[idx];
+  playSongInternal(songId, true);
+}
+
+function navPlaylist(dir) {
+  const pl = playlists.find(p => p.id === currentPlaylistId);
+  if (!pl) return;
+  const newIdx = currentPlaylistIdx + dir;
+  if (newIdx < 0 || newIdx >= pl.songIds.length) return;
+  currentPlaylistIdx = newIdx;
+  playSongInternal(pl.songIds[newIdx], true);
+}
+
+function backFromPlay() {
+  if (currentPlaylistId) {
+    const pl = playlists.find(p => p.id === currentPlaylistId);
+    if (pl) { stopScroll(); showScreen('screen-playlist-run'); renderRunList(pl); return; }
+  }
+  showList();
 }
 
 function esc(s) {
@@ -503,8 +850,18 @@ function showAdd(id) {
 }
 
 function cancelAdd() {
-  if (currentSongId) showScreen('screen-play');
-  else showList();
+  if (currentSongId && document.getElementById('screen-play')) {
+    // Se veio de dentro do play (editar letra), volta pro play
+    const cameFromPlay = editingId === currentSongId;
+    if (cameFromPlay) { showScreen('screen-play'); return; }
+  }
+  if (currentPlaylistId && playlists.find(p => p.id === currentPlaylistId)) {
+    const pl = playlists.find(p => p.id === currentPlaylistId);
+    showScreen('screen-playlist-run');
+    renderRunList(pl);
+    return;
+  }
+  showList();
 }
 
 function saveMusic() {
@@ -524,7 +881,7 @@ function saveMusic() {
   saveSongs();
   updateGistStatus();
   if (editingId && editingId === currentSongId) {
-    playSong(currentSongId);
+    playSongInternal(currentSongId, !!currentPlaylistId);
   } else {
     showList();
   }
@@ -537,11 +894,20 @@ function editCurrent() {
 // ══════════════════════════════════════════
 //  DELETE
 // ══════════════════════════════════════════
-function askDelete(id) {
-  const song = songs.find(s => s.id === id);
-  if (!song) return;
-  deleteTargetId = id;
-  document.getElementById('del-msg').textContent = `"${song.name}" será excluída permanentemente.`;
+function askDelete(id, type) {
+  type = type || 'song';
+  deleteTargetType = type;
+  if (type === 'playlist') {
+    const pl = playlists.find(p => p.id === id);
+    if (!pl) return;
+    deleteTargetId = id;
+    document.getElementById('del-msg').textContent = `O repertório "${pl.name}" será excluído permanentemente.`;
+  } else {
+    const song = songs.find(s => s.id === id);
+    if (!song) return;
+    deleteTargetId = id;
+    document.getElementById('del-msg').textContent = `"${song.name}" será excluída permanentemente.`;
+  }
   document.getElementById('del-overlay').classList.add('open');
 }
 function closeDelete() {
@@ -549,11 +915,19 @@ function closeDelete() {
   document.getElementById('del-overlay').classList.remove('open');
 }
 function confirmDelete() {
-  songs = songs.filter(s => s.id !== deleteTargetId);
-  saveSongs();
-  closeDelete();
-  renderList();
-  toast('Música excluída');
+  if (deleteTargetType === 'playlist') {
+    playlists = playlists.filter(p => p.id !== deleteTargetId);
+    savePlaylists();
+    closeDelete();
+    renderPlaylists();
+    toast('Repertório excluído');
+  } else {
+    songs = songs.filter(s => s.id !== deleteTargetId);
+    saveSongs();
+    closeDelete();
+    renderList();
+    toast('Música excluída');
+  }
 }
 
 // ══════════════════════════════════════════
@@ -568,6 +942,13 @@ const fontSizes = [14, 16, 17, 19, 22, 26];
 let fontIdx     = 2;
 
 function playSong(id) {
+  // Tocada a partir da lista de músicas avulsa: sem contexto de repertório
+  currentPlaylistId = null;
+  currentPlaylistIdx = -1;
+  playSongInternal(id, false);
+}
+
+function playSongInternal(id, fromPlaylist) {
   const song = songs.find(s => s.id === id);
   if (!song) return;
   currentSongId = id;
@@ -575,6 +956,20 @@ function playSong(id) {
   renderLyrics(song.lyrics);
   resetScroll();
   showScreen('screen-play');
+  updatePlayNav(fromPlaylist);
+}
+
+function updatePlayNav(fromPlaylist) {
+  const navRow = document.getElementById('play-nav-row');
+  if (!fromPlaylist || !currentPlaylistId) {
+    navRow.style.display = 'none';
+    return;
+  }
+  const pl = playlists.find(p => p.id === currentPlaylistId);
+  if (!pl) { navRow.style.display = 'none'; return; }
+  navRow.style.display = 'flex';
+  document.getElementById('nav-prev').disabled = currentPlaylistIdx <= 0;
+  document.getElementById('nav-next').disabled = currentPlaylistIdx >= pl.songIds.length - 1;
 }
 
 // Detecta se uma linha é de cifras:
@@ -731,31 +1126,54 @@ async function syncGist() {
     });
     if (!res.ok) throw new Error('Erro ao buscar Gist: ' + res.status);
     const data = await res.json();
+
     const file = data.files['repertorio.json'];
     let remoteSongs = [];
     if (file && file.content) {
       try { remoteSongs = JSON.parse(file.content); } catch(e) { remoteSongs = []; }
     }
 
+    const plFile = data.files['playlists.json'];
+    let remotePlaylists = [];
+    if (plFile && plFile.content) {
+      try { remotePlaylists = JSON.parse(plFile.content); } catch(e) { remotePlaylists = []; }
+    }
+
     // Merge: une locais + remotas, dedup por id, mantém mais recente por updated_at
     const merged = mergeSongs(songs, remoteSongs);
+    const mergedPlaylists = mergePlaylists(playlists, remotePlaylists);
 
     // Faz push do merged
     const patchRes = await fetch(`https://api.github.com/gists/${cfg.id}`, {
       method: 'PATCH',
       headers: { Authorization: `token ${cfg.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ files: { 'repertorio.json': { content: JSON.stringify(merged, null, 2) } } })
+      body: JSON.stringify({ files: {
+        'repertorio.json': { content: JSON.stringify(merged, null, 2) },
+        'playlists.json': { content: JSON.stringify(mergedPlaylists, null, 2) }
+      } })
     });
     if (!patchRes.ok) throw new Error('Erro ao salvar Gist: ' + patchRes.status);
 
     songs = merged;
+    playlists = mergedPlaylists;
     saveSongs();
-    renderList();
+    savePlaylists();
+    showList();
     updateGistStatus();
-    toast(`Sincronizado! ${merged.length} músicas ✓`);
+    toast(`Sincronizado! ${merged.length} músicas, ${mergedPlaylists.length} repertórios ✓`);
   } catch(e) {
     toast('Erro: ' + e.message);
   }
+}
+
+function mergePlaylists(local, remote) {
+  const map = {};
+  [...remote, ...local].forEach(p => {
+    if (!map[p.id] || (p.updated_at || 0) > (map[p.id].updated_at || 0)) {
+      map[p.id] = p;
+    }
+  });
+  return Object.values(map);
 }
 
 function mergeSongs(local, remote) {
@@ -853,6 +1271,7 @@ if (!localStorage.getItem(LS_TOKEN))   localStorage.setItem(LS_TOKEN, DEFAULT_TO
 if (!localStorage.getItem(LS_GIST_ID)) localStorage.setItem(LS_GIST_ID, DEFAULT_GIST_ID);
 
 loadSongs();
+loadPlaylists();
 renderList();
 updateGistStatus();
 
